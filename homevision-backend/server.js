@@ -24,7 +24,9 @@ app.use('/uploads', express.static('uploads'));
 //   useNewUrlParser: true,
 //   useUnifiedTopology: true,
 // });
-mongoose.connect('mongodb://localhost:27017/homevision');
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/homevision')
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 
 // Serve the main page

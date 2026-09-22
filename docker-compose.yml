@@ -1,0 +1,58 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: homevision-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: homevisionuser      # <-- change if you like
+      MONGO_INITDB_ROOT_PASSWORD: onkar118  # <-- change this
+      MONGO_INITDB_DATABASE: homevision
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - homevision-net
+    # No "ports:" here on purpose — Mongo stays unreachable from the host.
+
+  backend:
+    build:
+      context: ./homevision-backend
+    container_name: homevision-backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://homevisionuser:onkar118@mongo:27017/homevision?authSource=admin
+      JWT_SECRET: change-this-to-a-long-random-string   # <-- change this
+      EMAIL: ghugareonkar132@gmail.com                        # <-- change
+      EMAIL_PASSWORD: wndq rtvo gktb yqmm                  # <-- change
+      EMAIL_USER: ghugareonkar132@gmail.com                    # <-- change
+      EMAIL_PASS: wndq rtvo gktb yqmm                       # <-- change
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend-uploads:/app/uploads
+      - backend-pdfs:/app/pdfs
+    networks:
+      - homevision-net
+
+  frontend:
+    build:
+      context: ./homevision-frontend
+    container_name: homevision-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - homevision-net
+
+networks:
+  homevision-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  backend-uploads:
+  backend-pdfs:
